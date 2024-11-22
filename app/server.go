@@ -22,5 +22,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	connection.Write([]byte(pingResponse))
+	for {
+		var command []byte
+		_, err = connection.Read(command)
+		if err != nil {
+			fmt.Println("Error reading command:", err.Error())
+			os.Exit(1)
+		}
+		_, err = connection.Write([]byte(pingResponse))
+		if err != nil {
+			fmt.Println("Error writing response:", err.Error())
+			os.Exit(1)
+		}
+	}
 }
