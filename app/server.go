@@ -22,8 +22,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	i := 0
-	for i < 2 {
+	for {
 		var command []byte
 		_, err = connection.Read(command)
 		if err != nil {
@@ -35,6 +34,5 @@ func main() {
 			fmt.Println("Error writing response:", err.Error())
 			os.Exit(1)
 		}
-		i = i + 1
 	}
 }
