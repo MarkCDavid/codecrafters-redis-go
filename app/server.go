@@ -29,6 +29,7 @@ func main() {
 			fmt.Println("Error reading command:", err.Error())
 			os.Exit(1)
 		}
+		fmt.Print(command)
 		_, err = connection.Write([]byte(pingResponse))
 		if err != nil {
 			fmt.Println("Error writing response:", err.Error())
