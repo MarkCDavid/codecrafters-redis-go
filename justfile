@@ -7,6 +7,11 @@ clean:
 status:
   git status
 
+test:
+  just add .
+  git commit --allow-empty -m "Testing commit"
+  just push
+
 add PATH:
   git add {{PATH}}
 

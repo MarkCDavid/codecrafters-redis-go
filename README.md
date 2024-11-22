@@ -23,3 +23,6 @@ Requirements:
 
 `just run` builds and runs the application. `just cleans` removes the built executable from `/tmp` folder.
 
+# Reference
+
+[Redis serialization protocol (RESP) specification](https://redis.io/docs/latest/develop/reference/protocol-spec)
