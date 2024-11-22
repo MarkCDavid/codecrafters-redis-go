@@ -21,3 +21,5 @@ Requirements:
 
 `just add`, `just commit` and `just push` provides assistance with `git` commands, and pushing to two different remotes at the same time.
 
+`just run` builds and runs the application. `just cleans` removes the built executable from `/tmp` folder.
+

@@ -1,5 +1,8 @@
 run: 
-  go run .
+  go build -o /tmp/codecrafters-build-redis-go app/*.go && /tmp/codecrafters-build-redis-go "$@"
+
+clean:
+  rm -f /tmp/codecrafters-build-redis-go
 
 status:
   git status
