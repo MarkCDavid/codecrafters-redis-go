@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"net"
 	"os"
 )
@@ -17,19 +19,26 @@ func main() {
 		os.Exit(1)
 	}
 	connection, err := socket.Accept()
+	defer connection.Close()
 	if err != nil {
 		fmt.Println("Error accepting connection: ", err.Error())
 		os.Exit(1)
 	}
 
 	for {
-		var command []byte
+		command := make([]byte, 1024)
 		_, err = connection.Read(command)
+
+		if errors.Is(err, io.EOF) {
+			fmt.Println("Client closed the connecion.")
+			return
+		}
+
 		if err != nil {
 			fmt.Println("Error reading command:", err.Error())
 			os.Exit(1)
 		}
-		fmt.Print(command)
+
 		_, err = connection.Write([]byte(pingResponse))
 		if err != nil {
 			fmt.Println("Error writing response:", err.Error())
