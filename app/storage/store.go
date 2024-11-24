@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -28,17 +27,17 @@ func NewStore() Store {
 func (store *Store) Set(
 	key string,
 	value string,
-	expiresInMs *int,
+	expiresAt *time.Time,
 ) {
-	store.set(key, value, expiresInMs, store._store)
+	store.set(key, value, expiresAt, store._store)
 }
 
 func (store *Store) SetConfig(
 	key string,
 	value string,
-	expiresInMs *int,
+	expiresAt *time.Time,
 ) {
-	store.set(key, value, expiresInMs, store._config)
+	store.set(key, value, expiresAt, store._config)
 }
 
 func (store *Store) Get(
@@ -56,17 +55,9 @@ func (store *Store) GetConfig(
 func (store *Store) set(
 	key string,
 	value string,
-	expiresInMs *int,
+	expiresAt *time.Time,
 	_store *map[string]Entry,
 ) {
-	var expiresAt *time.Time
-	expiresAt = nil
-
-	if expiresInMs != nil {
-		expires := time.Now().UTC().Add(time.Duration(*expiresInMs) * time.Millisecond)
-		expiresAt = &expires
-	}
-
 	(*_store)[key] = Entry{
 		Value:     value,
 		Type:      "string",
@@ -86,8 +77,6 @@ func (store *Store) get(
 
 	if value.ExpiresAt != nil {
 		now := time.Now().UTC()
-		fmt.Println(now)
-		fmt.Println(*value.ExpiresAt)
 		if now.After(*value.ExpiresAt) {
 			delete((*_store), key)
 			return Entry{}, false

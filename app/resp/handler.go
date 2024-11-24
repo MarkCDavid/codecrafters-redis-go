@@ -4,13 +4,14 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/codecrafters-io/redis-starter-go/app/storage"
 )
 
 type Handler struct {
 	connection net.Conn
-	store      storage.Store
+	Store      storage.Store
 }
 
 func NewHandler(
@@ -19,7 +20,7 @@ func NewHandler(
 ) Handler {
 	return Handler{
 		connection: connection,
-		store:      store,
+		Store:      store,
 	}
 }
 
@@ -39,7 +40,15 @@ func (handler *Handler) HandleSet(reader *Reader) error {
 		return err
 	}
 
-	handler.store.Set(key, value, expiresInMs)
+	var expiresAt *time.Time
+	expiresAt = nil
+
+	if expiresInMs != nil {
+		expires := time.Now().UTC().Add(time.Duration(*expiresInMs) * time.Millisecond)
+		expiresAt = &expires
+	}
+
+	handler.Store.Set(key, value, expiresAt)
 
 	_, err = handler.connection.Write(EncodeSimpleString("OK"))
 	if err != nil {
@@ -55,7 +64,7 @@ func (handler *Handler) HandleGet(reader *Reader) error {
 		return err
 	}
 
-	entry, ok := handler.store.Get(key)
+	entry, ok := handler.Store.Get(key)
 
 	if ok {
 		_, err = handler.connection.Write(EncodeBulkString(entry.Value))
@@ -80,7 +89,7 @@ func (handler *Handler) HandleConfigGet(reader *Reader) error {
 			return err
 		}
 
-		entry, ok := handler.store.GetConfig(key)
+		entry, ok := handler.Store.GetConfig(key)
 		if !ok {
 			_, err = handler.connection.Write(EncodeNullBulkString())
 			if err != nil {

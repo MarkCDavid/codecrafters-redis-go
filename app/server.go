@@ -13,6 +13,7 @@ import (
 	"syscall"
 
 	"github.com/codecrafters-io/redis-starter-go/app/connection"
+	"github.com/codecrafters-io/redis-starter-go/app/rdb"
 	"github.com/codecrafters-io/redis-starter-go/app/resp"
 	"github.com/codecrafters-io/redis-starter-go/app/storage"
 )
@@ -72,12 +73,15 @@ func handleConnection(
 func main() {
 	rdbDirectory := flag.String("dir", "/tmp/rdb", "")
 	rdbFileName := flag.String("dbfilename", "dump.rdb", "")
+
 	flag.Parse()
 
 	store := storage.NewStore()
 
 	store.SetConfig("dir", *rdbDirectory, nil)
 	store.SetConfig("dbfilename", *rdbFileName, nil)
+
+	rdb.ReadRdb(store)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	registerInterruptHandling(cancel)
