@@ -28,6 +28,10 @@ func Parse(
 			err = handler.HandlePing(&reader)
 		case CommandEcho:
 			err = handler.HandleEcho(&reader)
+		case CommandSet:
+			err = handler.HandleSet(&reader)
+		case CommandGet:
+			err = handler.HandleGet(&reader)
 		default:
 			return fmt.Errorf("Command %s is not implemented.", value)
 		}

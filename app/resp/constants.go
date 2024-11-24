@@ -8,4 +8,6 @@ const (
 
 	CommandEcho = "ECHO"
 	CommandPing = "PING"
+	CommandSet  = "SET"
+	CommandGet  = "GET"
 )

@@ -32,7 +32,8 @@ func AcceptConnections(
 	ctx context.Context,
 	wg *sync.WaitGroup,
 	socket net.Listener,
-	handler func(context.Context, net.Conn),
+	store *map[string]string,
+	handler func(context.Context, net.Conn, *map[string]string),
 ) {
 	for {
 		select {
@@ -48,7 +49,7 @@ func AcceptConnections(
 			fmt.Printf("Received connection from %s\n", connection.RemoteAddr().String())
 			go func() {
 				wg.Add(1)
-				handler(ctx, connection)
+				handler(ctx, connection, store)
 				wg.Done()
 			}()
 		}

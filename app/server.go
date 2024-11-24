@@ -15,10 +15,6 @@ import (
 	"github.com/codecrafters-io/redis-starter-go/app/resp"
 )
 
-const (
-	pingResponse = "+PONG\r\n"
-)
-
 func registerInterruptHandling(cancel context.CancelFunc) {
 	interruptChannel := make(chan os.Signal, 1)
 	signal.Notify(interruptChannel, os.Interrupt, syscall.SIGTERM)
@@ -33,6 +29,7 @@ func registerInterruptHandling(cancel context.CancelFunc) {
 func handleConnection(
 	ctx context.Context,
 	connection net.Conn,
+	store *map[string]string,
 ) {
 	defer connection.Close()
 	for {
@@ -56,7 +53,7 @@ func handleConnection(
 
 			fmt.Println(string(readBuffer))
 
-			handler := resp.NewHandler(connection)
+			handler := resp.NewHandler(connection, store)
 			err = resp.Parse(&handler, readBuffer, readLength)
 			if err != nil {
 				fmt.Println("Failed to parse command:", err.Error())
@@ -73,13 +70,14 @@ func handleConnection(
 }
 
 func main() {
+	store := make(map[string]string)
 	ctx, cancel := context.WithCancel(context.Background())
 	registerInterruptHandling(cancel)
 
 	socket := connection.StartServer(ctx, "6379")
 	var wg sync.WaitGroup
 
-	connection.AcceptConnections(ctx, &wg, socket, handleConnection)
+	connection.AcceptConnections(ctx, &wg, socket, &store, handleConnection)
 	fmt.Println("Waiting for all connections to close.")
 	wg.Wait()
 	fmt.Println("All connections closed. Exiting...")
