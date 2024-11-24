@@ -48,12 +48,12 @@ func HandleDatabase(
 	if err != nil {
 		return err
 	}
-	expirySize, err := ReadSize(rdbFile)
+	_, err = ReadSize(rdbFile)
 	if err != nil {
 		return err
 	}
 
-	for index := 0; index < kvSize+expirySize; index++ {
+	for index := 0; index < kvSize; index++ {
 		indicator, err = ReadSingleByte(rdbFile)
 		if err != nil {
 			return err

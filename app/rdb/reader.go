@@ -89,6 +89,7 @@ func ReadRdb(storage storage.Store) {
 
 			return
 		default:
+			fmt.Println(rdb)
 			fmt.Printf("Indicator %x handler not implemented.\n", indicator)
 			return
 		}
