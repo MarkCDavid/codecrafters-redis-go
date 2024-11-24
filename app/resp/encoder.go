@@ -30,3 +30,18 @@ func EncodeBulkString(value string) []byte {
 		RespEOL,
 	))
 }
+
+func EncodeArray(values []string) []byte {
+	result := fmt.Sprintf(
+		"%s%d%s",
+		RespArrayType,
+		len(values),
+		RespEOL,
+	)
+
+	for _, value := range values {
+		result += string(EncodeBulkString(value))
+	}
+
+	return []byte(result)
+}

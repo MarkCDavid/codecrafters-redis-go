@@ -73,23 +73,28 @@ func (handler *Handler) HandleGet(reader *Reader) error {
 }
 
 func (handler *Handler) HandleConfigGet(reader *Reader) error {
-	key, err := reader.ParseBulkString()
+	var entries []string
+	for reader.CanRead(1) {
+		key, err := reader.ParseBulkString()
+		if err != nil {
+			return err
+		}
+
+		entry, ok := handler.store.GetConfig(key)
+		if !ok {
+			_, err = handler.connection.Write(EncodeNullBulkString())
+			if err != nil {
+				return err
+			}
+		}
+
+		entries = append(entries, key)
+		entries = append(entries, entry.Value)
+
+	}
+	_, err := handler.connection.Write(EncodeArray(entries))
 	if err != nil {
 		return err
-	}
-
-	entry, ok := handler.store.GetConfig(key)
-
-	if ok {
-		_, err = handler.connection.Write(EncodeBulkString(entry.Value))
-		if err != nil {
-			return err
-		}
-	} else {
-		_, err = handler.connection.Write(EncodeNullBulkString())
-		if err != nil {
-			return err
-		}
 	}
 
 	return nil
