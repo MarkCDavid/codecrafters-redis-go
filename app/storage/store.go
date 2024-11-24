@@ -1,6 +1,9 @@
 package storage
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Entry struct {
 	Value     string
@@ -50,6 +53,7 @@ func (store *Store) Get(
 
 	if value.ExpiresAt != nil {
 		now := time.Now().UTC()
+		fmt.Println(now)
 		if now.After(*value.ExpiresAt) {
 			delete((*store._store), key)
 		}
