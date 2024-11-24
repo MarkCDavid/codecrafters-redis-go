@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"net"
@@ -52,8 +53,6 @@ func handleConnection(
 				return
 			}
 
-			fmt.Println(string(readBuffer))
-
 			handler := resp.NewHandler(connection, store)
 			err = resp.Parse(&handler, readBuffer, readLength)
 			if err != nil {
@@ -71,7 +70,14 @@ func handleConnection(
 }
 
 func main() {
+	rdbDirectory := flag.String("dir", "/tmp/rdb", "")
+	rdbFileName := flag.String("dbfilename", "dump.rdb", "")
+
 	store := storage.NewStore()
+
+	store.SetConfig("dir", *rdbDirectory, nil)
+	store.SetConfig("dbfilename", *rdbFileName, nil)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	registerInterruptHandling(cancel)
 

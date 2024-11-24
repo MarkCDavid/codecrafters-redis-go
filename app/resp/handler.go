@@ -72,6 +72,29 @@ func (handler *Handler) HandleGet(reader *Reader) error {
 	return nil
 }
 
+func (handler *Handler) HandleConfigGet(reader *Reader) error {
+	key, err := reader.ParseBulkString()
+	if err != nil {
+		return err
+	}
+
+	entry, ok := handler.store.GetConfig(key)
+
+	if ok {
+		_, err = handler.connection.Write(EncodeBulkString(entry.Value))
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err = handler.connection.Write(EncodeNullBulkString())
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (handler *Handler) HandlePing(reader *Reader) error {
 	_, err := handler.connection.Write(EncodeSimpleString("PONG"))
 	if err != nil {

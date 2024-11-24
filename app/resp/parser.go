@@ -32,13 +32,39 @@ func Parse(
 			err = handler.HandleSet(&reader)
 		case CommandGet:
 			err = handler.HandleGet(&reader)
+		case CommandConfig:
+			err = ParseConfig(handler, &reader)
 		default:
+			fmt.Println(string(buffer))
 			return fmt.Errorf("Command %s is not implemented.", value)
 		}
 
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func ParseConfig(
+	handler *Handler,
+	reader *Reader,
+) error {
+	value, err := reader.ParseBulkString()
+	if err != nil {
+		return err
+	}
+
+	switch strings.ToUpper(value) {
+	case CommandGet:
+		err = handler.HandleConfigGet(reader)
+	default:
+		return fmt.Errorf("Command %s %s is not implemented.", CommandConfig, value)
+	}
+
+	if err != nil {
+		return err
 	}
 
 	return nil
