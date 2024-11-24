@@ -28,12 +28,12 @@ func HandleDatabase(
 	rdbFile *os.File,
 	rdb *RDB,
 ) error {
-	index, err := ReadSize(rdbFile)
+	dbIndex, err := ReadSize(rdbFile)
 	if err != nil {
 		return err
 	}
 
-	rdb.NewDB(index)
+	rdb.NewDB(dbIndex)
 
 	indicator, err := ReadSingleByte(rdbFile)
 	if err != nil {
@@ -100,7 +100,7 @@ func HandleDatabase(
 				return fmt.Errorf("Failure during metadata reading - %s\n", err)
 			}
 
-			rdb.Databases[index][key] = storage.Entry{
+			rdb.Databases[dbIndex][key] = storage.Entry{
 				Value:     value,
 				Type:      "string",
 				ExpiresAt: expiresAt,
