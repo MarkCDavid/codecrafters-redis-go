@@ -72,6 +72,7 @@ func handleConnection(
 func main() {
 	rdbDirectory := flag.String("dir", "/tmp/rdb", "")
 	rdbFileName := flag.String("dbfilename", "dump.rdb", "")
+	flag.Parse()
 
 	store := storage.NewStore()
 

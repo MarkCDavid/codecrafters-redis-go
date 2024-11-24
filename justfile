@@ -1,5 +1,5 @@
-run: 
-  go build -o /tmp/codecrafters-build-redis-go app/*.go && /tmp/codecrafters-build-redis-go "$@"
+run *ARGS: 
+  go build -o /tmp/codecrafters-build-redis-go app/*.go && /tmp/codecrafters-build-redis-go {{ ARGS }}
 
 clean:
   rm -f /tmp/codecrafters-build-redis-go
