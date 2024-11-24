@@ -96,6 +96,10 @@ func (handler *Handler) HandleEcho(reader *Reader) error {
 }
 
 func (reader *Reader) TryParseSetExpiry() (*int, error) {
+	if !reader.CanRead(1) {
+		return nil, nil
+	}
+
 	startedAt := reader.Index
 
 	parameterName, err := reader.ParseBulkString()

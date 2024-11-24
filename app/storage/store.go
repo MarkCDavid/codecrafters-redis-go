@@ -54,10 +54,12 @@ func (store *Store) Get(
 	if value.ExpiresAt != nil {
 		now := time.Now().UTC()
 		fmt.Println(now)
+		fmt.Println(*value.ExpiresAt)
 		if now.After(*value.ExpiresAt) {
 			delete((*store._store), key)
+			return Entry{}, false
 		}
-		return Entry{}, false
+		return value, true
 	}
 
 	return value, true
