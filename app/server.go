@@ -12,6 +12,7 @@ import (
 	"syscall"
 
 	"github.com/codecrafters-io/redis-starter-go/app/connection"
+	"github.com/codecrafters-io/redis-starter-go/app/resp"
 )
 
 const (
@@ -40,8 +41,8 @@ func handleConnection(
 			return
 
 		default:
-			command := make([]byte, 1024)
-			_, err := connection.Read(command)
+			readBuffer := make([]byte, 1024)
+			readLength, err := connection.Read(readBuffer)
 
 			if errors.Is(err, io.EOF) {
 				fmt.Println("Client closed the connecion.")
@@ -53,11 +54,20 @@ func handleConnection(
 				return
 			}
 
-			_, err = connection.Write([]byte(pingResponse))
+			fmt.Println(string(readBuffer))
+
+			handler := resp.NewHandler(connection)
+			err = resp.Parse(&handler, readBuffer, readLength)
 			if err != nil {
-				fmt.Println("Error writing response:", err.Error())
-				return
+				fmt.Println("Failed to parse command:", err.Error())
+				continue
 			}
+
+			// _, err = connection.Write([]byte(pingResponse))
+			// if err != nil {
+			// 	fmt.Println("Error writing response:", err.Error())
+			// 	return
+			// }
 		}
 	}
 }
