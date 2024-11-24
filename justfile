@@ -9,14 +9,14 @@ status:
 
 test:
   just add .
-  git commit --allow-empty -m "Testing commit"
+  just commit "Testing commit"
   just push
 
 add PATH:
   git add {{PATH}}
 
 commit MESSAGE:
-  git commit -m "{{ MESSAGE }}"
+  git commit --allow-empty -m "{{ MESSAGE }}"
 
 push BRANCH='master':
   git push origin {{ BRANCH }}
