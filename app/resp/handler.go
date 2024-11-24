@@ -1,18 +1,21 @@
 package resp
 
 import (
-	"fmt"
 	"net"
+	"strconv"
+	"strings"
+
+	"github.com/codecrafters-io/redis-starter-go/app/storage"
 )
 
 type Handler struct {
 	connection net.Conn
-	store      *map[string]string
+	store      storage.Store
 }
 
 func NewHandler(
 	connection net.Conn,
-	store *map[string]string,
+	store storage.Store,
 ) Handler {
 	return Handler{
 		connection: connection,
@@ -31,9 +34,12 @@ func (handler *Handler) HandleSet(reader *Reader) error {
 		return err
 	}
 
-	fmt.Println((*handler.store))
+	expiresInMs, err := reader.TryParseSetExpiry()
+	if err != nil {
+		return err
+	}
 
-	(*handler.store)[key] = value
+	handler.store.Set(key, value, expiresInMs)
 
 	_, err = handler.connection.Write(EncodeSimpleString("OK"))
 	if err != nil {
@@ -49,10 +55,10 @@ func (handler *Handler) HandleGet(reader *Reader) error {
 		return err
 	}
 
-	value, ok := (*handler.store)[key]
+	entry, ok := handler.store.Get(key)
 
 	if ok {
-		_, err = handler.connection.Write(EncodeBulkString(value))
+		_, err = handler.connection.Write(EncodeBulkString(entry.Value))
 		if err != nil {
 			return err
 		}
@@ -87,4 +93,33 @@ func (handler *Handler) HandleEcho(reader *Reader) error {
 	}
 
 	return nil
+}
+
+func (reader *Reader) TryParseSetExpiry() (*int, error) {
+	startedAt := reader.Index
+
+	parameterName, err := reader.ParseBulkString()
+	if err != nil {
+		reader.Index = startedAt
+		return nil, err
+	}
+
+	if strings.ToUpper(parameterName) != CommandSetParameterExpiry {
+		reader.Index = startedAt
+		return nil, nil
+	}
+
+	valueString, err := reader.ParseBulkString()
+	if err != nil {
+		reader.Index = startedAt
+		return nil, err
+	}
+
+	value, err := strconv.Atoi(valueString)
+	if err != nil {
+		reader.Index = startedAt
+		return nil, err
+	}
+
+	return &value, nil
 }

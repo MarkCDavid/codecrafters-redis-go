@@ -67,7 +67,6 @@ func (reader *Reader) ParseBulkString() (string, error) {
 
 	err = reader.ParseEOL()
 	if err != nil {
-		fmt.Println("this shi")
 		return "", err
 	}
 

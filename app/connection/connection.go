@@ -6,6 +6,8 @@ import (
 	"net"
 	"os"
 	"sync"
+
+	"github.com/codecrafters-io/redis-starter-go/app/storage"
 )
 
 func StartServer(
@@ -32,8 +34,8 @@ func AcceptConnections(
 	ctx context.Context,
 	wg *sync.WaitGroup,
 	socket net.Listener,
-	store *map[string]string,
-	handler func(context.Context, net.Conn, *map[string]string),
+	store storage.Store,
+	handler func(context.Context, net.Conn, storage.Store),
 ) {
 	for {
 		select {

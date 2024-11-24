@@ -13,6 +13,7 @@ import (
 
 	"github.com/codecrafters-io/redis-starter-go/app/connection"
 	"github.com/codecrafters-io/redis-starter-go/app/resp"
+	"github.com/codecrafters-io/redis-starter-go/app/storage"
 )
 
 func registerInterruptHandling(cancel context.CancelFunc) {
@@ -29,7 +30,7 @@ func registerInterruptHandling(cancel context.CancelFunc) {
 func handleConnection(
 	ctx context.Context,
 	connection net.Conn,
-	store *map[string]string,
+	store storage.Store,
 ) {
 	defer connection.Close()
 	for {
@@ -70,14 +71,14 @@ func handleConnection(
 }
 
 func main() {
-	store := make(map[string]string)
+	store := storage.NewStore()
 	ctx, cancel := context.WithCancel(context.Background())
 	registerInterruptHandling(cancel)
 
 	socket := connection.StartServer(ctx, "6379")
 	var wg sync.WaitGroup
 
-	connection.AcceptConnections(ctx, &wg, socket, &store, handleConnection)
+	connection.AcceptConnections(ctx, &wg, socket, store, handleConnection)
 	fmt.Println("Waiting for all connections to close.")
 	wg.Wait()
 	fmt.Println("All connections closed. Exiting...")

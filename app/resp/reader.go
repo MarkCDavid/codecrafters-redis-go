@@ -6,9 +6,9 @@ import (
 )
 
 type Reader struct {
-	buffer []byte
-	size   int
-	index  int
+	Buffer []byte
+	Size   int
+	Index  int
 }
 
 func NewReader(
@@ -16,9 +16,9 @@ func NewReader(
 	size int,
 ) Reader {
 	return Reader{
-		buffer: buffer,
-		size:   size,
-		index:  0,
+		Buffer: buffer,
+		Size:   size,
+		Index:  0,
 	}
 }
 
@@ -39,7 +39,7 @@ func (reader *Reader) ReadInteger() (int, error) {
 			return resultInteger, nil
 		}
 
-		reader.index += 1
+		reader.Index += 1
 		result += value
 	}
 }
@@ -52,7 +52,7 @@ func (reader *Reader) Read(
 		return "", err
 	}
 
-	reader.index += length
+	reader.Index += length
 	return value, nil
 }
 
@@ -60,17 +60,17 @@ func (reader *Reader) Peek(
 	length int,
 ) (string, error) {
 	if !reader.CanRead(length) {
-		return "", fmt.Errorf("%d exceeds size of %d", reader.index+length, reader.size)
+		return "", fmt.Errorf("%d exceeds size of %d", reader.Index+length, reader.Size)
 	}
 
-	value := string(reader.buffer[reader.index : reader.index+length])
+	value := string(reader.Buffer[reader.Index : reader.Index+length])
 	return value, nil
 }
 
 func (reader *Reader) CanRead(
 	length int,
 ) bool {
-	return reader.index+length <= reader.size
+	return reader.Index+length <= reader.Size
 }
 
 func isDigit(value string) bool {
