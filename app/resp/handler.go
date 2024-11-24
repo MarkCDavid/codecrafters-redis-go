@@ -63,7 +63,7 @@ func (handler *Handler) HandleGet(reader *Reader) error {
 			return err
 		}
 	} else {
-		_, err = handler.connection.Write(EncodeBulkString("-1"))
+		_, err = handler.connection.Write(EncodeNullBulkString())
 		if err != nil {
 			return err
 		}
