@@ -58,6 +58,25 @@ func (handler *Handler) HandleSet(reader *Reader) error {
 	return nil
 }
 
+func (handler *Handler) HandleKeys(reader *Reader) error {
+	pattern, err := reader.ParseBulkString()
+	if err != nil {
+		return err
+	}
+
+	matchingKeys, err := handler.Store.Keys(pattern)
+	if err != nil {
+		return err
+	}
+
+	_, err = handler.connection.Write(EncodeArray(matchingKeys))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (handler *Handler) HandleGet(reader *Reader) error {
 	key, err := reader.ParseBulkString()
 	if err != nil {

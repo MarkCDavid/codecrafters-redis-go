@@ -32,6 +32,8 @@ func Parse(
 			err = handler.HandleSet(&reader)
 		case CommandGet:
 			err = handler.HandleGet(&reader)
+		case CommandKeys:
+			err = handler.HandleKeys(&reader)
 		case CommandConfig:
 			err = ParseConfig(handler, &reader)
 		default:

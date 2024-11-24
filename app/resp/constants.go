@@ -15,4 +15,6 @@ const (
 	CommandSetParameterExpiry = "PX"
 
 	CommandGet = "GET"
+
+	CommandKeys = "KEYS"
 )
