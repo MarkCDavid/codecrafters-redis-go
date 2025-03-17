@@ -1,5 +1,9 @@
 BUILD_PATH := "/tmp/codecrafters-build-redis-go"
-GIT := if path_exists(home_directory() + "/.ssh/id_mcd_ed25519") == "true" { "GIT_SSH_COMMAND='ssh -i " + home_directory() + "/.ssh/id_mcd_ed25519 -o IdentitiesOnly=yes' git" } else { "git" }
+GIT := if path_exists(home_directory() + "/.ssh/id_mcd_ed25519") == "true" {
+  "GIT_SSH_COMMAND='ssh -i " + home_directory() + "/.ssh/id_mcd_ed25519 -o IdentitiesOnly=yes' git" 
+} else { 
+  "git" 
+}
 
 build:
   go build -o {{ BUILD_PATH }} app/*.go
