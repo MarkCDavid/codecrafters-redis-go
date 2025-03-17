@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"strings"
 )
 
 const (
@@ -37,7 +38,7 @@ func main() {
 func HandleConnection(connection net.Conn) {
 	defer connection.Close()
 	for {
-		buffer := make([]byte, 100)
+		buffer := make([]byte, 1024)
 		_, err := connection.Read(buffer)
 
 		if errors.Is(err, io.EOF) {
@@ -49,7 +50,28 @@ func HandleConnection(connection net.Conn) {
 			return
 		}
 
-		connection.Write(AsSimpleString("PONG"))
+		parsedCommand, err := ParseCommand(buffer)
+		if err != nil {
+			fmt.Println("Error reading data: ", err.Error())
+			return
+		}
+
+		if parsedCommand[0] == nil {
+			fmt.Println("Provided command is nil.")
+			return
+		}
+
+		command, parameters := strings.ToUpper(*parsedCommand[0]), parsedCommand[1:]
+
+		switch command {
+		case "PING":
+			connection.Write(AsSimpleString("PONG"))
+		case "ECHO":
+			connection.Write(AsBulkString(parameters))
+		default:
+			connection.Close()
+		}
+
 	}
 }
 
@@ -65,4 +87,32 @@ func AsSimpleString(value string) []byte {
 	simpleString[len(simpleString)-1] = byte('\n')
 
 	return simpleString
+}
+
+func lengthToBytes(length int) []byte {
+	return []byte(fmt.Sprintf("%d", length))
+}
+
+func AsBulkString(value []*string) []byte {
+	bulkString := make([]byte, 0)
+	bulkString = append(bulkString, byte('*'))
+	bulkString = append(bulkString, lengthToBytes(len(value))...)
+	bulkString = append(bulkString, TERMINATOR...)
+	for _, string := range value {
+		if string == nil {
+			bulkString = append(bulkString, byte('$'))
+			bulkString = append(bulkString, lengthToBytes(-1)...)
+			bulkString = append(bulkString, TERMINATOR...)
+		} else {
+			bulkString = append(bulkString, byte('$'))
+			bulkString = append(bulkString, lengthToBytes(len(*string))...)
+			bulkString = append(bulkString, TERMINATOR...)
+			bulkString = append(bulkString, []byte(*string)...)
+			bulkString = append(bulkString, TERMINATOR...)
+		}
+	}
+
+	bulkString = append(bulkString, TERMINATOR...)
+
+	return bulkString
 }
