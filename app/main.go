@@ -24,26 +24,29 @@ func main() {
 		os.Exit(1)
 	}
 
-	connection, err := socket.Accept()
-	defer connection.Close()
+	for {
+		connection, err := socket.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection: ", err.Error())
+		}
 
-	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
-		os.Exit(1)
+		go HandleConnection(connection)
 	}
+}
 
+func HandleConnection(connection net.Conn) {
+	defer connection.Close()
 	for {
 		buffer := make([]byte, 100)
-		_, err = connection.Read(buffer)
+		_, err := connection.Read(buffer)
 
 		if errors.Is(err, io.EOF) {
 			fmt.Println("Connection closed.")
-			os.Exit(0)
-
+			return
 		}
 		if err != nil {
 			fmt.Println("Error reading data: ", err.Error())
-			os.Exit(1)
+			return
 		}
 
 		connection.Write(AsSimpleString("PONG"))
