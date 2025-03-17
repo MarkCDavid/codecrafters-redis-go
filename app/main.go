@@ -1,10 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"net"
 	"os"
-	"strings"
 )
 
 const (
@@ -17,27 +18,34 @@ func main() {
 
 	fmt.Printf("Listening on %s...\n", address)
 	socket, err := net.Listen("tcp", address)
+	defer socket.Close()
 	if err != nil {
 		fmt.Printf("Failed to bind to port %s.\n", BIND_PORT)
 		os.Exit(1)
 	}
 
 	connection, err := socket.Accept()
+	defer connection.Close()
+
 	if err != nil {
 		fmt.Println("Error accepting connection: ", err.Error())
 		os.Exit(1)
 	}
 
-	buffer := make([]byte, 1000)
+	for {
+		buffer := make([]byte, 100)
+		_, err = connection.Read(buffer)
 
-	count, err := connection.Read(buffer)
-	if err != nil {
-		fmt.Println("Error reading data: ", err.Error())
-		os.Exit(1)
-	}
+		if errors.Is(err, io.EOF) {
+			fmt.Println("Connection closed.")
+			os.Exit(0)
 
-	commands := string(buffer[:count])
-	for range strings.Split(commands, "\n") {
+		}
+		if err != nil {
+			fmt.Println("Error reading data: ", err.Error())
+			os.Exit(1)
+		}
+
 		connection.Write(AsSimpleString("PONG"))
 	}
 }
