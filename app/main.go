@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 )
 
 const (
@@ -27,7 +28,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	connection.Write(AsSimpleString("PONG"))
+	buffer := make([]byte, 1000)
+
+	count, err := connection.Read(buffer)
+	if err != nil {
+		fmt.Println("Error reading data: ", err.Error())
+		os.Exit(1)
+	}
+
+	commands := string(buffer[:count])
+	for range strings.Split(commands, "\n") {
+		connection.Write(AsSimpleString("PONG"))
+	}
 }
 
 // https://redis.io/docs/latest/develop/reference/protocol-spec/#simple-strings
