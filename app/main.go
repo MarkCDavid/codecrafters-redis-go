@@ -6,23 +6,28 @@ import (
 	"os"
 )
 
+const (
+	BIND_ADDRESS = "0.0.0.0"
+	BIND_PORT    = "6379"
+)
+
 func main() {
-	fmt.Println("Listening on 0.0.0.0:6379...")
-	socket, err := net.Listen("tcp", "0.0.0.0:6379")
+	address := fmt.Sprintf("%s:%s", BIND_ADDRESS, BIND_PORT)
+
+	fmt.Printf("Listening on %s...\n", address)
+	socket, err := net.Listen("tcp", address)
 	if err != nil {
-		fmt.Println("Failed to bind to port 6379")
+		fmt.Printf("Failed to bind to port %s.\n", BIND_PORT)
 		os.Exit(1)
 	}
 
-	for {
-		connection, err := socket.Accept()
-		if err != nil {
-			fmt.Println("Error accepting connection: ", err.Error())
-			os.Exit(1)
-		}
-
-		connection.Write(AsSimpleString("PONG"))
+	connection, err := socket.Accept()
+	if err != nil {
+		fmt.Println("Error accepting connection: ", err.Error())
+		os.Exit(1)
 	}
+
+	connection.Write(AsSimpleString("PONG"))
 }
 
 // https://redis.io/docs/latest/develop/reference/protocol-spec/#simple-strings
